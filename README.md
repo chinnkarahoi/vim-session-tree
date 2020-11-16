@@ -12,12 +12,12 @@ Undo changes triggered by closing or opening windows.If you open multiple window
 
 ---
 #### `:RedoSession` Command
-Undo :UndoSession
+Undo `:UndoSession`
 
 ---
 #### `:RestoreSession` Command
-Used from command line to restore last session that you quit vim in current working directory.
-`vim -c RestoreSession`
+Used with command line to restore last session that you quit vim in current working directory,
+which is `vim +RestoreSession`. You can add a alias for it for convenience.
 
 ### Options
 `g:session_tree_data_dir` Default: `~/.cache/vim-session-tree`  
@@ -25,4 +25,4 @@ Session files will be saved to this directory.
 
 ---
 `g:session_tree_count_limit` Default: `100`  
-Maximum session files on vim startup, redundant files will be deleted. Set to -1 to disable.
+Limit maximum session files on vim startup. Redundant files will be deleted. Set to -1 to disable.
