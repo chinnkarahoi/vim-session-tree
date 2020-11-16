@@ -97,7 +97,7 @@ function! s:tree.make_session(increase) abort
     call self.insert(self.cur_node, new_node)
     let self.cur_node = new_node
   endif
-  exec "silent! mksession! " . session_filepath
+  exec "mksession! " . session_filepath
 endfunction
 let g:close_unlisted_ignored_filetype = get(g:, 'close_unlisted_ignored_filetype', ['tagbar'])
 let g:enable_close_unlisted = get(g:, 'enable_close_unlisted', 1)
@@ -109,7 +109,7 @@ function! s:close_unlisted() abort
         if index(g:close_unlisted_ignored_filetype, getbufvar(j, '&filetype')) < 0
           let ret = 1
         endif
-        exec "silent! bd! " . j
+        exec "bd " . j
       endif
     endfor
   endfor
@@ -138,15 +138,15 @@ function! s:tree.restore_session() abort
     return
   endif
   try
-    call ToggleBufSession(0)
-    silent tabonly
-    silent only
+    call s:toggle_buf_session(0)
+    tabonly
+    only
     enew
-    exec "silent! source " . session_filepath
+    exec "silent source " . session_filepath
   catch
   finally
     call s:count_restorable_buffers()
-    call ToggleBufSession(1)
+    call s:toggle_buf_session(1)
   endtry
 endfunction
 function! s:tree.undo_session(...) abort
@@ -199,12 +199,13 @@ function! s:count_restorable_buffers() abort
   return s:buffer_count
 endfunction
 let s:session_increase = 0
+let s:session_restore_set = 0
 let g:session_tree_bufwin_filetype = get(g:, 'session_tree_bufwin_filetype', ['git'])
-function! ToggleBufSession(arg)
+function! s:toggle_buf_session(arg)
   if a:arg == 1
     augroup SessionTree
       autocmd!
-      autocmd VimEnter * call s:count_restorable_buffers()
+      autocmd VimEnter * doautocmd SessionTree CursorHold
       autocmd BufWinEnter,BufWinLeave *
             \ if index(g:session_tree_bufwin_filetype, &filetype) >= 0 |
             \   let s:session_increase = 1 |
@@ -227,7 +228,7 @@ function! ToggleBufSession(arg)
     augroup END
   endif
 endfunction
-call ToggleBufSession(1)
+call s:toggle_buf_session(1)
 command! RestoreSession call s:tree.restore_session()
 command! UndoSession call s:tree.undo_session()
 command! RedoSession call s:tree.redo_session()
