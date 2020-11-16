@@ -26,3 +26,12 @@ Session files will be saved to this directory.
 ---
 `g:session_tree_count_limit` Default: `100`  
 Limit maximum session files on vim startup. Redundant files will be deleted. Set to -1 to disable.
+
+### Example config
+```vim
+nnoremap <silent> <leader>u :<c-u>UndoSession<cr>
+nnoremap <silent> <leader>r :<c-u>RedoSession<cr>
+set updatetime=50
+set nocompatible
+set sessionoptions=buffers,folds,tabpages,winpos,localoptions
+```
