@@ -142,7 +142,7 @@ function! s:tree.restore_session() abort
     silent tabonly
     silent only
     enew
-    exec "silent! source" . session_filepath
+    exec "silent! source " . session_filepath
   catch
   finally
     call s:count_restorable_buffers()
