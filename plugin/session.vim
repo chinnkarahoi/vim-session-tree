@@ -205,7 +205,7 @@ function! s:count_restorable_buffers() abort
   let s:buffer_count = 0
   for i in range(1,tabpagenr('$'))
     for j in tabpagebuflist(i)
-      if len(getbufinfo(j)) > 0 && has_key(getbufinfo(j)[0], 'listed')
+      if len(getbufinfo(j)) > 0 && has_key(getbufinfo(j)[0], 'listed') && &buftype != 'terminal'
         let s:buffer_count += getbufinfo(j)[0]['listed'] * ((bufname(j) !='') + 1)
       endif
     endfor
