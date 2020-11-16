@@ -31,7 +31,7 @@ Limit maximum session files on vim startup. Redundant files will be deleted. Set
 ```vim
 nnoremap <silent> <leader>u :<c-u>UndoSession<cr>
 nnoremap <silent> <leader>r :<c-u>RedoSession<cr>
-set updatetime=50
+set updatetime=100
 set nocompatible
 set sessionoptions=buffers,folds,tabpages,winpos,localoptions
 ```

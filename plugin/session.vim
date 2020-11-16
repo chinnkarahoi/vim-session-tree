@@ -142,14 +142,18 @@ function! s:check_status() abort
   endif
   return v:true
 endfunction
-function! s:tree.restore_session() abort
+function! s:tree.restore_session(...) abort
   if !s:check_status()
-    return
+    return v:false
   endif
-  let session_filepath = self.get_file()
+  let x = self.cur_node
+  if a:0 > 0
+    let x = a:1
+  endif
+  let session_filepath = self.get_file(x)
   if !filereadable(session_filepath)
-    echo 'no session'
-    return
+    echo 'no more session'
+    return v:false
   endif
   try
     call s:toggle_buf_session(0)
@@ -158,10 +162,12 @@ function! s:tree.restore_session() abort
     enew
     exec "silent source " . session_filepath
   catch
+    return v:false
   finally
     call s:count_restorable_buffers()
     call s:toggle_buf_session(1)
   endtry
+  return v:true
 endfunction
 function! s:tree.undo_session(...) abort
   if !s:check_status()
@@ -169,25 +175,19 @@ function! s:tree.undo_session(...) abort
   endif
   let y = self.cur_node
   let x = self.get_parent(y)
-  if !filereadable(self.get_file(x))
-    echo "no more session"
-    return
+  if self.restore_session(x)
+    let self.next[x] = y
+    let self.cur_node = x
   endif
-  let self.next[x] = y
-  let self.cur_node = x
-  call self.restore_session()
 endfunction
 function! s:tree.redo_session(...) abort
   if !s:check_status()
     return
   endif
   let y = self.get_next()
-  if !filereadable(self.get_file(y))
-    echo "no more session"
-    return
+  if self.restore_session(y)
+    let self.cur_node = y
   endif
-  let self.cur_node = y
-  call self.restore_session()
 endfunction
 function! s:tree.vimleave() abort
   if g:session_tree_vimleave_record == 1
