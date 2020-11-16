@@ -14,7 +14,7 @@ function! s:get_path() abort
   endif
 endfunction
 function! s:get_timestamp() abort
-  return printf("%030s", localtime() . '.' . float2nr(reltimefloat(reltime()) * 1000000))
+  return printf("%030s", localtime() . '.' . float2nr(reltimefloat(reltime()) * 1000000) % 1000000)
 endfunction
 
 let g:session_tree_data_dir = get(g:, 'session_tree_data_dir', s:join($HOME, '.cache', 'vim-session-tree'))
@@ -89,7 +89,21 @@ function! s:tree.get_file(...) abort
   endif
   return s:makefile(a:1, self.get_parent(a:1))
 endfunction
+let s:session_tree_exists_bufname = ['[Command Line]']
+function! s:check_exists() abort
+  for i in range(1,tabpagenr('$'))
+    for j in tabpagebuflist(i)
+      if index(s:session_tree_exists_bufname, bufname(j)) >= 0
+        return v:true
+      endif
+    endfor
+  endfor
+  return v:false
+endfunction
 function! s:tree.make_session(increase) abort
+  if s:check_exists()
+    return
+  endif
   let session_filepath = self.get_file()
   if a:increase > 0 || self.cur_node == '0' || !filereadable(session_filepath)
     let new_node = s:get_timestamp()
@@ -139,8 +153,8 @@ function! s:tree.restore_session() abort
   endif
   try
     call s:toggle_buf_session(0)
-    tabonly
-    only
+    silent tabonly
+    silent only
     enew
     exec "silent source " . session_filepath
   catch
