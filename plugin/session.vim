@@ -243,6 +243,6 @@ function! s:toggle_buf_session(arg)
   endif
 endfunction
 call s:toggle_buf_session(1)
-command! RestoreSession call s:tree.restore_session()
-command! UndoSession call s:tree.undo_session()
-command! RedoSession call s:tree.redo_session()
+command! SessionRestore call s:tree.restore_session()
+command! SessionUndo call s:tree.undo_session()
+command! SessionRedo call s:tree.redo_session()
