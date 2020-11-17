@@ -116,12 +116,12 @@ endfunction
 let g:close_unlisted_ignored_filetype = get(g:, 'close_unlisted_ignored_filetype', ['tagbar'])
 let g:enable_close_unlisted = get(g:, 'enable_close_unlisted', 1)
 function! s:close_unlisted() abort
-  let ret = 0
+  let ret = v:false
   for i in range(1,tabpagenr('$'))
     for j in tabpagebuflist(i)
       if len(getbufinfo(j)) == 0 || !has_key(getbufinfo(j)[0], 'listed') || getbufinfo(j)[0]['listed'] == 0
         if index(g:close_unlisted_ignored_filetype, getbufvar(j, '&filetype')) < 0 && tabpagenr() == i
-          let ret = 1
+          let ret = v:true
         endif
         exec "bd " . j
       endif
@@ -129,14 +129,27 @@ function! s:close_unlisted() abort
   endfor
   return ret
 endfunction
+function! s:check_modified() abort
+  for i in range(1,tabpagenr('$'))
+    for j in tabpagebuflist(i)
+      if getbufvar(j, '&modified', 0) == 1
+        return v:true
+      endif
+    endfor
+  endfor
+  return v:false
+endfunction
 function! s:check_status() abort
   if exists('#goyo')
     Goyo
     return v:false
   endif
+  if s:check_modified()
+    return v:false
+  endif
   if g:enable_close_unlisted == 1
-    let ret = s:close_unlisted()
-    if ret == 1
+    if s:close_unlisted()
+      echo "unsaved buffer exists"
       return v:false
     endif
   endif
@@ -170,9 +183,6 @@ function! s:tree.restore_session(...) abort
   return v:true
 endfunction
 function! s:tree.undo_session(...) abort
-  if !s:check_status()
-    return
-  endif
   let y = self.cur_node
   let x = self.get_parent(y)
   if self.restore_session(x)
@@ -181,9 +191,6 @@ function! s:tree.undo_session(...) abort
   endif
 endfunction
 function! s:tree.redo_session(...) abort
-  if !s:check_status()
-    return
-  endif
   let y = self.get_next()
   if self.restore_session(y)
     let self.cur_node = y
