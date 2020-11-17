@@ -120,7 +120,7 @@ function! s:close_unlisted() abort
   for i in range(1,tabpagenr('$'))
     for j in tabpagebuflist(i)
       if len(getbufinfo(j)) == 0 || !has_key(getbufinfo(j)[0], 'listed') || getbufinfo(j)[0]['listed'] == 0
-        if index(g:close_unlisted_ignored_filetype, getbufvar(j, '&filetype')) < 0
+        if index(g:close_unlisted_ignored_filetype, getbufvar(j, '&filetype')) < 0 && tabpagenr() == i
           let ret = 1
         endif
         exec "bd " . j
