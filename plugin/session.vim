@@ -183,17 +183,40 @@ function! s:tree.restore_session(...) abort
   return v:true
 endfunction
 function! s:tree.undo_session(...) abort
-  let y = self.cur_node
-  let x = self.get_parent(y)
-  if self.restore_session(x)
+  let count = 1
+  if a:0 > 0
+    let count = a:1
+  endif
+  let x = self.cur_node
+  for i in range(count)
+    let y = x
+    let x = self.get_parent(y)
+    if x == 0
+      let x = y
+      break
+    endif
     let self.next[x] = y
+  endfor
+  if x != self.cur_node && self.restore_session(x)
     let self.cur_node = x
   endif
 endfunction
 function! s:tree.redo_session(...) abort
-  let y = self.get_next()
-  if self.restore_session(y)
-    let self.cur_node = y
+  let count = 1
+  if a:0 > 0
+    let count = a:1
+  endif
+  let x = self.cur_node
+  for i in range(count)
+    let y = x
+    let x = self.get_next(y)
+    if y == 0
+      let x = y
+      break
+    endif
+  endfor
+  if self.restore_session(x)
+    let self.cur_node = x
   endif
 endfunction
 function! s:tree.vimleave() abort
@@ -251,5 +274,5 @@ function! s:toggle_buf_session(arg)
 endfunction
 call s:toggle_buf_session(1)
 command! SessionRestore call s:tree.restore_session()
-command! SessionUndo call s:tree.undo_session()
-command! SessionRedo call s:tree.redo_session()
+command! -nargs=1 SessionUndo call s:tree.undo_session(<f-args>)
+command! -nargs=1 SessionRedo call s:tree.redo_session(<f-args>)
