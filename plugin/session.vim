@@ -180,6 +180,7 @@ function! s:tree.restore_session(...) abort
     call s:count_restorable_buffers()
     call s:toggle_buf_session(1)
   endtry
+  silent! edit
   return v:true
 endfunction
 function! s:tree.undo_session(...) abort
