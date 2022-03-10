@@ -20,6 +20,9 @@ endfunction
 let g:session_tree_data_dir = get(g:, 'session_tree_data_dir', s:join($HOME, '.cache', 'vim-session-tree'))
 let g:session_tree_count_limit = get(g:, 'session_tree_count_limit', 100)
 let g:session_tree_vimleave_record = get(g:, 'session_tree_vimleave_record', 1)
+let g:session_tree_enable_mappings = get(g:, 'session_tree_enable_mappings', 1)
+let g:close_unlisted_ignored_filetype = get(g:, 'close_unlisted_ignored_filetype', ['tagbar'])
+let g:enable_close_unlisted = get(g:, 'enable_close_unlisted', 0)
 
 let s:session_tree_dir = s:join(g:session_tree_data_dir, s:get_path())
 if !isdirectory(s:session_tree_dir)
@@ -113,8 +116,6 @@ function! s:tree.make_session(increase) abort
   endif
   exec "mksession! " . session_filepath
 endfunction
-let g:close_unlisted_ignored_filetype = get(g:, 'close_unlisted_ignored_filetype', ['tagbar'])
-let g:enable_close_unlisted = get(g:, 'enable_close_unlisted', 1)
 function! s:close_unlisted() abort
   let ret = v:false
   for i in range(1,tabpagenr('$'))
@@ -276,3 +277,16 @@ call s:toggle_buf_session(1)
 command! SessionRestore call s:tree.restore_session()
 command! -nargs=1 SessionUndo call s:tree.undo_session(<f-args>)
 command! -nargs=1 SessionRedo call s:tree.redo_session(<f-args>)
+
+if g:session_tree_enable_mappings
+  function! UndoSessionMove() abort
+    let file = expand('%:p')
+    norm! mZ
+    SessionUndo 1
+    exec "tabnew " . file
+    norm! `Z
+  endfunction
+  nnoremap <silent> <M-[> :silent! w<cr>:<c-u>exec "SessionUndo" . v:count1 <cr>
+  nnoremap <silent> <M-]> :silent! w<cr>:<c-u>exec "SessionRedo" . v:count1 <cr>
+  nnoremap <silent> <M-x> :silent! w<cr>:<c-u>call UndoSessionMove()<cr>
+endif
